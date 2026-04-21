@@ -1,39 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open WhatsApp</title>
-    <meta
-      name="description"
-      content="Continue to WhatsApp with the prepared HIGHTAC inquiry message."
-    >
+    <title>WhatsApp</title>
+    <meta name="description" content="Message WhatsApp prêt.">
     <link rel="stylesheet" href="./assets/css/styles.css">
   </head>
   <body data-page="success">
-    <main class="page-shell">
-      <section class="success-card">
-        <p class="section-kicker">Success</p>
-        <h1>Continue in WhatsApp</h1>
-        <p id="success-text">
-          Preparing...
-        </p>
-        <div class="hero-card__actions">
-          <a class="primary-button" id="success-open" href="https://wa.me/8613602489689">Open WhatsApp</a>
-          <a class="ghost-button" href="./parts.html">Back to Parts</a>
-        </div>
-        <p class="subtle-note" id="success-status"></p>
-      </section>
+    <div class="site-backdrop" aria-hidden="true">
+      <span class="site-backdrop__orb site-backdrop__orb--one"></span>
+      <span class="site-backdrop__orb site-backdrop__orb--two"></span>
+      <span class="site-backdrop__grid"></span>
+    </div>
 
-      <section class="panel">
-        <div class="panel__header">
-          <div>
-            <p class="section-kicker">Inquiry</p>
-            <h2>Selected Parts</h2>
+    <main class="simple-page simple-page--success">
+      <header class="top-strip top-strip--success panel-surface panel-surface--header">
+        <div class="top-strip__slot top-strip__slot--left"></div>
+        <div class="top-strip__slot top-strip__slot--center">
+          <div class="lang-switch" data-lang-switcher>
+            <button class="lang-switch__button" type="button" data-lang="en">English</button>
+            <button class="lang-switch__button" type="button" data-lang="fr">Français</button>
+            <button class="lang-switch__button" type="button" data-lang="ar">العربية</button>
           </div>
         </div>
-        <div class="summary-list" id="success-items"></div>
+        <div class="top-strip__slot top-strip__slot--right"></div>
+      </header>
+
+      <section class="success-panel panel-surface panel-surface--success">
+        <div class="success-panel__badge" aria-hidden="true">OK</div>
+        <h1 data-i18n="success_title">Message prêt</h1>
+        <p id="success-text" data-i18n="success_ready">Votre message WhatsApp est prêt.</p>
       </section>
+
+      <section class="success-list" id="success-items"></section>
+
+      <div class="bottom-actions panel-surface panel-surface--actions" id="success-actions">
+        <a class="bottom-actions__button bottom-actions__button--primary" id="success-open" href="https://wa.me/8613602489689" data-i18n="open_whatsapp">
+          Ouvrir WhatsApp
+        </a>
+        <a class="bottom-actions__button bottom-actions__button--secondary" href="./parts.html" data-i18n="back_parts">
+          Retour aux pièces
+        </a>
+      </div>
     </main>
 
     <div id="toast-root"></div>

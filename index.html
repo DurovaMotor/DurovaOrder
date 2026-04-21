@@ -1,83 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>HIGHTAC | Model Directory</title>
-    <meta
-      name="description"
-      content="HIGHTAC GitHub Pages trial for SYMPHONY ST parts inquiry."
-    >
+    <title>HIGHTAC SHOP</title>
+    <meta name="description" content="Catalogue HIGHTAC pour SYMPHONY ST.">
     <link rel="stylesheet" href="./assets/css/styles.css">
   </head>
   <body data-page="home">
-    <div class="app-shell app-shell--home">
-      <header class="topbar topbar--home">
-        <div class="topbar__left">
-          <span class="brand-dot"></span>
-          <div>
-            <p class="eyebrow">HIGHTAC Trial</p>
-            <h1>Model Directory</h1>
+    <div class="site-backdrop" aria-hidden="true">
+      <span class="site-backdrop__orb site-backdrop__orb--one"></span>
+      <span class="site-backdrop__orb site-backdrop__orb--two"></span>
+      <span class="site-backdrop__grid"></span>
+    </div>
+
+    <main class="simple-page simple-page--home">
+      <header class="top-strip panel-surface panel-surface--header">
+        <div class="top-strip__slot top-strip__slot--left">
+          <div class="top-box top-box--yellow" data-i18n="home_shop">BOUTIQUE HIGHTAC</div>
+        </div>
+        <div class="top-strip__slot top-strip__slot--center">
+          <div class="lang-switch" data-lang-switcher>
+            <button class="lang-switch__button" type="button" data-lang="en">English</button>
+            <button class="lang-switch__button" type="button" data-lang="fr">Français</button>
+            <button class="lang-switch__button" type="button" data-lang="ar">العربية</button>
           </div>
         </div>
-        <a class="header-cta" href="./parts.html">Open Catalog</a>
+        <div class="top-strip__slot top-strip__slot--right">
+          <a class="top-box top-box--cyan" href="https://wa.me/8613602489689" data-i18n="home_whatsapp">
+            WhatsApp
+          </a>
+        </div>
       </header>
 
-      <main class="page page--home">
-        <section class="hero hero--home">
-          <div class="hero__content">
-            <p class="eyebrow">HIGHTAC</p>
-            <h2>SYMPHONY ST Parts</h2>
-            <div class="hero__stats-row">
-              <span class="meta-pill" data-home-model>SYMPHONY ST</span>
-              <span class="meta-pill" data-home-parts>Loading parts...</span>
-              <span class="meta-pill" data-home-photos>Loading images...</span>
-            </div>
-            <div class="hero__actions">
-              <a class="button button--primary" href="./parts.html">Browse SYMPHONY ST</a>
-              <a class="button button--ghost" href="https://wa.me/8613602489689">WhatsApp</a>
-            </div>
+      <section class="home-hero panel-surface panel-surface--hero">
+        <a class="home-bike-link home-bike-link--solo" href="./parts.html" aria-label="Open parts page">
+          <div class="home-bike-link__visual">
+            <div class="home-bike-link__glow" aria-hidden="true"></div>
+            <img class="home-bike-link__image" data-home-image src="./Database/MotorPictures/SYMPHONY ST.png" alt="SYMPHONY ST">
           </div>
-          <div class="hero__visual card-glow">
-            <div class="hero-bike">
-              <div class="hero-bike__label">Model</div>
-              <div class="hero-bike__stage">
-                <img class="hero-bike__image" data-home-image src="./Database/MotorPictures/SYMPHONY ST.png" alt="SYMPHONY ST">
-              </div>
-              <div class="hero-bike__details">
-                <h3 data-home-model>SYMPHONY ST</h3>
-              </div>
-              <div class="hero-bike__stats">
-                <span class="meta-pill" data-home-parts>Loading parts...</span>
-                <span class="meta-pill" data-home-photos>Loading images...</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="model-grid">
-          <article class="model-card card-glow">
-            <div class="model-card__content">
-              <p class="eyebrow">Catalog</p>
-              <h3 data-home-model>SYMPHONY ST</h3>
-              <div class="model-card__stats">
-                <span class="meta-pill" data-home-parts>Loading parts...</span>
-                <span class="meta-pill" data-home-photos>Loading images...</span>
-              </div>
-              <div class="hero__actions">
-                <a class="button button--primary" href="./parts.html">Open Parts Page</a>
-              </div>
-            </div>
-            <div class="model-card__art">
-              <img class="model-card__art-image" data-home-image src="./Database/MotorPictures/SYMPHONY ST.png" alt="SYMPHONY ST">
-              <div class="model-card__art-label">
-                <strong>SYMPHONY ST</strong>
-              </div>
-            </div>
-          </article>
-        </section>
-      </main>
-    </div>
+          <span class="home-bike-link__label" data-home-model>SYMPHONY ST</span>
+        </a>
+      </section>
+    </main>
 
     <div id="toast-root"></div>
     <script src="./data/parts-data.js"></script>

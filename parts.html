@@ -1,53 +1,57 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SYMPHONY ST Parts</title>
-    <meta
-      name="description"
-      content="Browse all SYMPHONY ST trial parts, adjust quantities by 10, and submit the inquiry to WhatsApp."
-    >
+    <title>Pièces SYMPHONY ST</title>
+    <meta name="description" content="Toutes les pièces SYMPHONY ST.">
     <link rel="stylesheet" href="./assets/css/styles.css">
   </head>
   <body data-page="parts">
-    <main class="page-shell page-shell--parts">
-      <header class="mobile-hero">
-        <div class="mobile-hero__top">
-          <a class="back-link" href="./index.html">Back to Models</a>
-          <button class="primary-button primary-button--small" type="button" id="page-submit">Submit Inquiry</button>
-        </div>
+    <div class="site-backdrop" aria-hidden="true">
+      <span class="site-backdrop__orb site-backdrop__orb--one"></span>
+      <span class="site-backdrop__orb site-backdrop__orb--two"></span>
+      <span class="site-backdrop__grid"></span>
+    </div>
 
-        <div class="mobile-hero__card">
-          <div class="mobile-hero__copy">
-            <p class="section-kicker">Catalog</p>
-            <h1>SYMPHONY ST</h1>
-            <div class="chip-row">
-              <span class="info-chip" id="parts-count-chip">Loading parts...</span>
-              <span class="info-chip" id="parts-photo-chip">Loading images...</span>
-            </div>
+    <main class="simple-page simple-page--parts">
+      <header class="top-strip panel-surface panel-surface--header">
+        <div class="top-strip__slot top-strip__slot--left">
+          <a class="top-box top-box--yellow" href="./index.html" data-i18n="back_models">Retour aux modèles</a>
+        </div>
+        <div class="top-strip__slot top-strip__slot--center">
+          <div class="lang-switch" data-lang-switcher>
+            <button class="lang-switch__button" type="button" data-lang="en">English</button>
+            <button class="lang-switch__button" type="button" data-lang="fr">Français</button>
+            <button class="lang-switch__button" type="button" data-lang="ar">العربية</button>
           </div>
-          <img class="mobile-hero__image" id="parts-model-image" src="./Database/MotorPictures/SYMPHONY ST.png" alt="SYMPHONY ST">
+        </div>
+        <div class="top-strip__slot top-strip__slot--right">
+          <button class="top-box top-box--cyan" type="button" id="page-submit" data-i18n="send_whatsapp">
+            Envoyer sur WhatsApp
+          </button>
         </div>
       </header>
 
-      <section class="panel panel--sticky">
-        <div class="search-block">
-          <label for="parts-search">Search by part name or code</label>
-          <input id="parts-search" type="search" placeholder="Example: muffler, 50350-ARA-PT">
-        </div>
-        <div class="chip-row chip-row--compact">
-          <span class="info-chip" id="parts-status">0 parts</span>
-          <span class="info-chip" id="parts-meta">0 selected / 0 qty</span>
-          <span class="subtle-note" id="parts-progress">Showing 0 / 0</span>
+      <section class="search-row panel-surface panel-surface--search">
+        <label class="search-row__label" for="parts-search" data-i18n="search_label">Recherche</label>
+        <div class="search-row__field">
+          <svg class="search-row__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10.5 4a6.5 6.5 0 1 0 4.06 11.58l4.43 4.43 1.41-1.41-4.43-4.43A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" fill="currentColor"/>
+          </svg>
+          <input
+            id="parts-search"
+            class="search-row__input"
+            type="search"
+            placeholder="Rechercher un nom ou un code"
+            data-i18n-placeholder="search_placeholder"
+          >
         </div>
       </section>
 
       <section class="parts-list" id="parts-list" aria-live="polite"></section>
-      <section class="empty-state" id="parts-empty" hidden>
-        <h2>No matching parts</h2>
-      </section>
-      <div class="list-footer" id="parts-loading">Loading parts...</div>
+      <section class="empty-state panel-surface" id="parts-empty" hidden data-i18n="no_parts">Aucune pièce.</section>
+      <div class="list-footer" id="parts-loading" data-i18n="loading">Chargement...</div>
       <div id="parts-sentinel" class="list-sentinel" aria-hidden="true"></div>
     </main>
 

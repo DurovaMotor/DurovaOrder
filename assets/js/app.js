@@ -1,23 +1,149 @@
 (function () {
   var CART_KEY = "hightac-cart-v1";
-  var LAST_SUBMISSION_KEY = "hightac-last-submission-v1";
-  var CART_UPDATED_EVENT = "cart:updated";
-  var WHATSAPP_PHONE = "8613602489689";
-  var STEP = 10;
-  var CHUNK_SIZE = 80;
+  var SUBMISSION_KEY = "hightac-last-submission-v1";
+  var LANG_KEY = "hightac-language-v1";
+  var DEFAULT_LANG = "fr";
+  var PAGE_SIZE = Number.MAX_SAFE_INTEGER;
+
+  var LOCALES = {
+    fr: {
+      dir: "ltr",
+      title_home: "BOUTIQUE HIGHTAC",
+      title_parts: "Pièces SYMPHONY ST",
+      title_success: "WhatsApp",
+      home_shop: "BOUTIQUE HIGHTAC",
+      home_whatsapp: "WhatsApp",
+      home_hint: "Cliquez sur le scooter pour voir toutes les pièces",
+      back_models: "Retour aux modèles",
+      back_parts: "Retour aux pièces",
+      send_whatsapp: "Envoyer sur WhatsApp",
+      open_whatsapp: "Ouvrir WhatsApp",
+      search_label: "Recherche",
+      search_placeholder: "Rechercher un nom ou un code",
+      loading: "Chargement...",
+      loading_more: "Chargement...",
+      no_parts: "Aucune pièce.",
+      code_label: "Code",
+      qty_label: "Qté",
+      cart_label: "Panier",
+      cart_title: "Panier",
+      cart_empty: "Le panier est vide.",
+      cart_lines: "{count} article(s)",
+      cart_total: "Qté {count}",
+      cart_send: "Envoyer sur WhatsApp",
+      cart_close: "Fermer",
+      success_title: "Message prêt",
+      success_ready: "Votre message WhatsApp est prêt.",
+      success_missing: "Aucun message trouvé.",
+      toast_empty: "Le panier est vide.",
+      unnamed_part: "Pièce",
+      language_en: "English",
+      language_fr: "Français",
+      language_ar: "العربية"
+    },
+    en: {
+      dir: "ltr",
+      title_home: "HIGHTAC SHOP",
+      title_parts: "SYMPHONY ST Parts",
+      title_success: "WhatsApp",
+      home_shop: "HIGHTAC SHOP",
+      home_whatsapp: "WhatsApp",
+      home_hint: "Click the scooter to view all parts",
+      back_models: "Back to Models",
+      back_parts: "Back to Parts",
+      send_whatsapp: "Send to WhatsApp",
+      open_whatsapp: "Open WhatsApp",
+      search_label: "Search",
+      search_placeholder: "Search by name or code",
+      loading: "Loading...",
+      loading_more: "Loading...",
+      no_parts: "No parts found.",
+      code_label: "Code",
+      qty_label: "Qty",
+      cart_label: "Cart",
+      cart_title: "Cart",
+      cart_empty: "Cart is empty.",
+      cart_lines: "{count} item(s)",
+      cart_total: "Qty {count}",
+      cart_send: "Send to WhatsApp",
+      cart_close: "Close",
+      success_title: "Message ready",
+      success_ready: "Your WhatsApp message is ready.",
+      success_missing: "No message found.",
+      toast_empty: "Cart is empty.",
+      unnamed_part: "Part",
+      language_en: "English",
+      language_fr: "French",
+      language_ar: "Arabic"
+    },
+    ar: {
+      dir: "rtl",
+      title_home: "متجر HIGHTAC",
+      title_parts: "قطع SYMPHONY ST",
+      title_success: "واتساب",
+      home_shop: "متجر HIGHTAC",
+      home_whatsapp: "واتساب",
+      home_hint: "اضغط على السكوتر لعرض جميع القطع",
+      back_models: "العودة إلى الموديلات",
+      back_parts: "العودة إلى القطع",
+      send_whatsapp: "إرسال إلى واتساب",
+      open_whatsapp: "افتح واتساب",
+      search_label: "بحث",
+      search_placeholder: "ابحث بالاسم أو الرمز",
+      loading: "جارٍ التحميل...",
+      loading_more: "جارٍ التحميل...",
+      no_parts: "لا توجد قطع.",
+      code_label: "الرمز",
+      qty_label: "الكمية",
+      cart_label: "السلة",
+      cart_title: "السلة",
+      cart_empty: "السلة فارغة.",
+      cart_lines: "{count} عنصر",
+      cart_total: "الكمية {count}",
+      cart_send: "إرسال إلى واتساب",
+      cart_close: "إغلاق",
+      success_title: "الرسالة جاهزة",
+      success_ready: "رسالة واتساب جاهزة.",
+      success_missing: "لا توجد رسالة.",
+      toast_empty: "السلة فارغة.",
+      unnamed_part: "قطعة",
+      language_en: "English",
+      language_fr: "Français",
+      language_ar: "العربية"
+    }
+  };
+
   var state = {
-    catalog: [],
+    lang: readStorage(LANG_KEY, DEFAULT_LANG),
+    catalog: null,
     filtered: [],
     rendered: 0,
     index: {},
-    observer: null,
+    observer: null
   };
+
+  document.addEventListener("DOMContentLoaded", init);
+
+  function init() {
+    state.catalog = getCatalog();
+    initLanguageSwitchers();
+    initCartShell();
+    initPage();
+    applyLanguage();
+  }
 
   function getCatalog() {
     if (window.HIGHTAC_PARTS_DATA && Array.isArray(window.HIGHTAC_PARTS_DATA.parts)) {
       return window.HIGHTAC_PARTS_DATA;
     }
-    return null;
+
+    return {
+      model: {
+        name: "SYMPHONY ST",
+        motorPicture: "Database/MotorPictures/SYMPHONY ST.png"
+      },
+      parts: []
+    };
   }
 
   function readStorage(key, fallback) {
@@ -25,7 +151,6 @@
       var raw = window.localStorage.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
     } catch (error) {
-      console.warn("Unable to read storage:", key, error);
       return fallback;
     }
   }
@@ -34,8 +159,124 @@
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.warn("Unable to write storage:", key, error);
+      console.warn("storage write failed", key, error);
     }
+  }
+
+  function t(key, vars) {
+    var langMap = LOCALES[state.lang] || LOCALES[DEFAULT_LANG];
+    var text = langMap[key] || LOCALES[DEFAULT_LANG][key] || key;
+    var output = text;
+
+    if (vars) {
+      Object.keys(vars).forEach(function (name) {
+        output = output.replaceAll("{" + name + "}", vars[name]);
+      });
+    }
+
+    return output;
+  }
+
+  function setLanguage(lang) {
+    if (!LOCALES[lang]) {
+      return;
+    }
+
+    state.lang = lang;
+    writeStorage(LANG_KEY, lang);
+    applyLanguage();
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = LOCALES[state.lang].dir;
+    document.body.classList.toggle("is-rtl", LOCALES[state.lang].dir === "rtl");
+
+    document.querySelectorAll("[data-i18n]").forEach(function (node) {
+      node.textContent = t(node.getAttribute("data-i18n"));
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (node) {
+      node.setAttribute("placeholder", t(node.getAttribute("data-i18n-placeholder")));
+    });
+
+    document.querySelectorAll("[data-lang-switcher]").forEach(function (switcher) {
+      switcher.querySelectorAll("[data-lang]").forEach(function (button) {
+        var buttonLang = button.getAttribute("data-lang");
+        button.textContent = t("language_" + buttonLang);
+        button.classList.toggle("is-active", buttonLang === state.lang);
+      });
+    });
+
+    updateTitles();
+    renderHome();
+    renderPartsPage();
+    renderCartButton();
+    renderCartDrawer();
+    renderSuccessPage();
+  }
+
+  function updateTitles() {
+    var page = document.body.getAttribute("data-page");
+
+    if (page === "home") {
+      document.title = t("title_home");
+    } else if (page === "parts") {
+      document.title = t("title_parts");
+    } else if (page === "success") {
+      document.title = t("title_success");
+    }
+  }
+
+  function initLanguageSwitchers() {
+    document.querySelectorAll("[data-lang-switcher] [data-lang]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        setLanguage(button.getAttribute("data-lang"));
+      });
+    });
+  }
+
+  function renderHome() {
+    if (document.body.getAttribute("data-page") !== "home") {
+      return;
+    }
+
+    var image = document.querySelector("[data-home-image]");
+    var label = document.querySelector("[data-home-model]");
+    var link = document.querySelector(".home-bike-link");
+
+    if (image) {
+      image.src = "./" + state.catalog.model.motorPicture;
+      image.alt = state.catalog.model.name;
+    }
+
+    if (label) {
+      label.textContent = state.catalog.model.name;
+    }
+
+    if (link) {
+      link.setAttribute("aria-label", state.catalog.model.name);
+    }
+  }
+
+  function getPartName(part) {
+    return getPreferredPartName(part, t("unnamed_part"));
+  }
+
+  function getPartMessageName(part) {
+    return getPreferredPartName(part, LOCALES.en.unnamed_part);
+  }
+
+  function getPreferredPartName(part, fallback) {
+    return cleanText(part && part.nameEn) ||
+      cleanText(part && part.displayName) ||
+      cleanText(part && part.nameZh) ||
+      cleanText(part && part.code) ||
+      fallback;
+  }
+
+  function cleanText(value) {
+    return String(value == null ? "" : value).trim();
   }
 
   function escapeHtml(value) {
@@ -48,25 +289,19 @@
   }
 
   function formatNumber(value) {
-    return new Intl.NumberFormat("en-US").format(value || 0);
+    return new Intl.NumberFormat(
+      state.lang === "ar" ? "ar" : state.lang === "fr" ? "fr-FR" : "en-US"
+    ).format(value || 0);
   }
 
-  function getPartTitle(part) {
-    return part.nameZh || part.displayName || part.nameEn || part.code || "Unnamed Part";
-  }
-
-  function getPartSubtitle(part) {
-    if (part.nameEn && part.nameEn !== part.nameZh) {
-      return part.nameEn;
-    }
-    if (part.nameZh && part.displayName && part.displayName !== part.nameZh) {
-      return part.displayName;
-    }
-    return "";
-  }
-
-  function getInquiryName(part) {
-    return part.displayName || part.nameEn || part.nameZh || part.code || "Unnamed Part";
+  function buildPlaceholderImage(part) {
+    var code = escapeHtml(cleanText(part && part.code) || "NO CODE");
+    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160">' +
+        '<rect width="220" height="160" rx="16" fill="#f6f6f6"/>' +
+        '<text x="16" y="88" fill="#111" font-size="18" font-family="Arial, sans-serif" font-weight="700">' + code + "</text>" +
+      "</svg>"
+    );
   }
 
   function resolveImage(part) {
@@ -74,20 +309,7 @@
       return "./" + part.picture;
     }
 
-    var title = escapeHtml(getInquiryName(part));
-    var code = escapeHtml((part && part.code) || "NO CODE");
-    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">' +
-        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-        '<stop stop-color="#fef3c7" offset="0%"/>' +
-        '<stop stop-color="#fb923c" offset="100%"/>' +
-        "</linearGradient></defs>" +
-        '<rect width="320" height="240" rx="24" fill="url(#g)"/>' +
-        '<text x="24" y="100" fill="#12213d" font-size="18" font-family="Arial, sans-serif">No product image</text>' +
-        '<text x="24" y="136" fill="#12213d" font-size="22" font-weight="700" font-family="Arial, sans-serif">' + code + "</text>" +
-        '<text x="24" y="172" fill="#12213d" font-size="14" font-family="Arial, sans-serif">' + title + "</text>" +
-      "</svg>"
-    );
+    return buildPlaceholderImage(part);
   }
 
   function loadCart() {
@@ -96,35 +318,33 @@
 
   function saveCart(cart) {
     writeStorage(CART_KEY, cart);
-    window.dispatchEvent(new CustomEvent(CART_UPDATED_EVENT, { detail: getCartSummary(cart) }));
   }
 
-  function getCartItems(cart) {
-    var source = cart || loadCart();
-    return Object.values(source)
+  function getCartItems() {
+    var cart = loadCart();
+
+    return Object.values(cart)
       .filter(function (item) {
         return item && item.code && item.quantity > 0;
       })
       .sort(function (left, right) {
-        return getInquiryName(left).localeCompare(getInquiryName(right), "en", { sensitivity: "base" });
+        return getPartName(left).localeCompare(getPartName(right));
       });
   }
 
-  function getCartSummary(cart) {
-    var items = getCartItems(cart);
+  function getCartSummary() {
+    var items = getCartItems();
+
     return {
       items: items,
       lineCount: items.length,
       totalQuantity: items.reduce(function (sum, item) {
         return sum + item.quantity;
-      }, 0),
+      }, 0)
     };
   }
 
   function getPartQuantity(code) {
-    if (!code) {
-      return 0;
-    }
     var cart = loadCart();
     return cart[code] ? cart[code].quantity : 0;
   }
@@ -134,59 +354,383 @@
       return 0;
     }
 
-    var nextQuantity = Math.max(0, Number(quantity) || 0);
+    var next = Math.max(0, Math.floor(Number(quantity) || 0));
     var cart = loadCart();
 
-    if (nextQuantity === 0) {
+    if (next <= 0) {
       delete cart[part.code];
       saveCart(cart);
+      renderCartButton();
+      renderCartDrawer();
+      syncPartInputs();
       return 0;
     }
 
     cart[part.code] = {
       code: part.code,
-      displayName: getInquiryName(part),
-      nameZh: part.nameZh || "",
       nameEn: part.nameEn || "",
+      nameZh: part.nameZh || "",
+      displayName: part.displayName || "",
       picture: part.picture || null,
-      quantity: nextQuantity,
+      quantity: next
     };
+
     saveCart(cart);
-    return nextQuantity;
+    renderCartButton();
+    renderCartDrawer();
+    syncPartInputs();
+    return next;
   }
 
   function changeCartQuantity(part, delta) {
     return updateCartQuantity(part, getPartQuantity(part.code) + delta);
   }
 
-  function showToast(message) {
-    var root = document.getElementById("toast-root");
-    if (!root) {
-      root = document.createElement("div");
-      root.id = "toast-root";
-      document.body.appendChild(root);
+  function initPage() {
+    var page = document.body.getAttribute("data-page");
+
+    if (page === "parts") {
+      initPartsPage();
+    }
+  }
+
+  function initPartsPage() {
+    var search = document.getElementById("parts-search");
+    var submit = document.getElementById("page-submit");
+    var sentinel = document.getElementById("parts-sentinel");
+
+    if (!search || !submit) {
+      return;
     }
 
-    var toast = document.createElement("div");
-    toast.className = "toast";
-    toast.textContent = message;
-    root.appendChild(toast);
-
-    window.requestAnimationFrame(function () {
-      toast.classList.add("toast--visible");
+    state.index = {};
+    state.catalog.parts.forEach(function (part) {
+      state.index[part.code] = part;
     });
 
-    window.setTimeout(function () {
-      toast.classList.remove("toast--visible");
-      toast.addEventListener("transitionend", function () {
-        toast.remove();
-      }, { once: true });
-    }, 2200);
+    submit.addEventListener("click", submitCart);
+    search.addEventListener("input", function () {
+      renderPartsPage();
+    });
+
+    if ("IntersectionObserver" in window && sentinel) {
+      state.observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            renderNextChunk();
+          }
+        });
+      }, { rootMargin: "240px 0px" });
+
+      state.observer.observe(sentinel);
+    }
+  }
+
+  function getFilteredParts() {
+    var search = document.getElementById("parts-search");
+    var term = search ? search.value.trim().toLowerCase() : "";
+
+    if (!term) {
+      return state.catalog.parts.slice();
+    }
+
+    return state.catalog.parts.filter(function (part) {
+      var haystack = String(part.searchText || "").toLowerCase();
+      return haystack.includes(term);
+    });
+  }
+
+  function renderPartsPage() {
+    if (document.body.getAttribute("data-page") !== "parts") {
+      return;
+    }
+
+    state.filtered = getFilteredParts();
+    state.rendered = 0;
+
+    var list = document.getElementById("parts-list");
+    var empty = document.getElementById("parts-empty");
+    var loading = document.getElementById("parts-loading");
+    var sentinel = document.getElementById("parts-sentinel");
+
+    if (!list || !empty || !loading || !sentinel) {
+      return;
+    }
+
+    list.innerHTML = "";
+    empty.hidden = state.filtered.length > 0;
+    loading.hidden = state.filtered.length === 0;
+    loading.textContent = t("loading");
+    sentinel.hidden = state.filtered.length === 0;
+
+    if (!state.filtered.length) {
+      return;
+    }
+
+    renderNextChunk();
+  }
+
+  function renderNextChunk() {
+    if (document.body.getAttribute("data-page") !== "parts") {
+      return;
+    }
+
+    var list = document.getElementById("parts-list");
+    var loading = document.getElementById("parts-loading");
+    var sentinel = document.getElementById("parts-sentinel");
+
+    if (!list || !loading || !sentinel) {
+      return;
+    }
+
+    if (state.rendered >= state.filtered.length) {
+      loading.hidden = true;
+      sentinel.hidden = true;
+      return;
+    }
+
+    var slice = state.filtered.slice(state.rendered, state.rendered + PAGE_SIZE);
+    list.insertAdjacentHTML("beforeend", slice.map(renderPartRow).join(""));
+    state.rendered += slice.length;
+    bindPartRowEvents(list);
+    syncPartInputs();
+
+    if (state.rendered >= state.filtered.length) {
+      loading.hidden = true;
+      sentinel.hidden = true;
+    } else {
+      loading.hidden = false;
+      loading.textContent = t("loading_more");
+      sentinel.hidden = false;
+    }
+  }
+
+  function renderPartRow(part) {
+    var quantity = getPartQuantity(part.code);
+
+    return '' +
+      '<article class="part-row" data-part-code="' + escapeHtml(part.code) + '">' +
+        '<div class="part-row__image-box">' +
+          '<img class="part-row__image" src="' + resolveImage(part) + '" alt="' + escapeHtml(getPartName(part)) + '" loading="lazy">' +
+        '</div>' +
+        '<div class="part-row__body">' +
+          '<div class="part-row__title">' + escapeHtml(getPartName(part)) + '</div>' +
+          '<div class="part-row__code">' + t("code_label") + ': ' + escapeHtml(part.code) + '</div>' +
+          '<div class="part-row__controls">' +
+            '<button class="control-btn control-btn--plain" type="button" data-action="minus10">-10</button>' +
+            '<div class="manual-box" aria-live="polite">' +
+              '<span>' + t("qty_label") + '</span>' +
+              '<strong class="manual-box__value" data-qty-display>' + formatNumber(quantity) + '</strong>' +
+            '</div>' +
+            '<button class="control-btn control-btn--plain" type="button" data-action="plus10">+10</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+  }
+
+  function bindPartRowEvents(root) {
+    root.querySelectorAll("[data-part-code]").forEach(function (row) {
+      if (row.dataset.bound === "1") {
+        return;
+      }
+
+      row.dataset.bound = "1";
+      row.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-action]");
+        var code;
+        var part;
+        var action;
+
+        if (!button) {
+          return;
+        }
+
+        code = row.getAttribute("data-part-code");
+        part = state.index[code];
+
+        if (!part) {
+          return;
+        }
+
+        action = button.getAttribute("data-action");
+
+        if (action === "minus10") {
+          changeCartQuantity(part, -10);
+        } else if (action === "plus10") {
+          changeCartQuantity(part, 10);
+        }
+      });
+    });
+  }
+
+  function syncPartInputs() {
+    document.querySelectorAll("[data-part-code]").forEach(function (row) {
+      var code = row.getAttribute("data-part-code");
+      var value = row.querySelector("[data-qty-display]");
+
+      if (value) {
+        value.textContent = formatNumber(getPartQuantity(code));
+      }
+    });
+  }
+
+  function initCartShell() {
+    if (document.querySelector("[data-cart-toggle]")) {
+      return;
+    }
+
+    var wrapper = document.createElement("div");
+    wrapper.innerHTML = '' +
+      '<button class="cart-fab" type="button" data-cart-toggle aria-label="Cart">' +
+        '<span class="cart-fab__label"></span>' +
+        '<span class="cart-fab__count" data-cart-count>0</span>' +
+      '</button>' +
+      '<div class="cart-mask" data-cart-mask hidden></div>' +
+      '<aside class="cart-drawer" data-cart-drawer aria-hidden="true">' +
+        '<div class="cart-drawer__header">' +
+          '<strong data-cart-title></strong>' +
+          '<button class="cart-drawer__close" type="button" data-cart-close aria-label="Close">&times;</button>' +
+        '</div>' +
+        '<div class="cart-drawer__summary">' +
+          '<span data-cart-lines></span>' +
+          '<span data-cart-total></span>' +
+        '</div>' +
+        '<div class="cart-drawer__body" data-cart-items></div>' +
+        '<div class="cart-drawer__footer">' +
+          '<button class="cart-drawer__send" type="button" data-cart-submit></button>' +
+        '</div>' +
+      '</aside>';
+    document.body.appendChild(wrapper);
+
+    var toggle = document.querySelector("[data-cart-toggle]");
+    var mask = document.querySelector("[data-cart-mask]");
+    var closeButton = document.querySelector("[data-cart-close]");
+    var submitButton = document.querySelector("[data-cart-submit]");
+    var drawer = document.querySelector("[data-cart-drawer]");
+
+    toggle.addEventListener("click", function () {
+      setCartOpen(true);
+    });
+
+    mask.addEventListener("click", function () {
+      setCartOpen(false);
+    });
+
+    closeButton.addEventListener("click", function () {
+      setCartOpen(false);
+    });
+
+    submitButton.addEventListener("click", submitCart);
+
+    drawer.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-cart-action]");
+      var code;
+      var item;
+
+      if (!button) {
+        return;
+      }
+
+      code = button.getAttribute("data-code");
+      item = loadCart()[code];
+
+      if (!item) {
+        return;
+      }
+
+      if (button.getAttribute("data-cart-action") === "minus10") {
+        changeCartQuantity(item, -10);
+      } else if (button.getAttribute("data-cart-action") === "plus10") {
+        changeCartQuantity(item, 10);
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        setCartOpen(false);
+      }
+    });
+  }
+
+  function setCartOpen(open) {
+    var drawer = document.querySelector("[data-cart-drawer]");
+    var mask = document.querySelector("[data-cart-mask]");
+
+    if (!drawer || !mask) {
+      return;
+    }
+
+    drawer.classList.toggle("is-open", open);
+    drawer.setAttribute("aria-hidden", String(!open));
+    mask.hidden = !open;
+  }
+
+  function renderCartButton() {
+    var button = document.querySelector("[data-cart-toggle]");
+    var label = document.querySelector(".cart-fab__label");
+    var count = document.querySelector("[data-cart-count]");
+    var summary = getCartSummary();
+
+    if (!button || !label || !count) {
+      return;
+    }
+
+    button.setAttribute("aria-label", t("cart_title"));
+    label.textContent = t("cart_label");
+    count.textContent = String(summary.totalQuantity);
+    count.hidden = summary.totalQuantity <= 0;
+  }
+
+  function renderCartDrawer() {
+    var drawer = document.querySelector("[data-cart-drawer]");
+
+    if (!drawer) {
+      return;
+    }
+
+    var summary = getCartSummary();
+    var title = drawer.querySelector("[data-cart-title]");
+    var lines = drawer.querySelector("[data-cart-lines]");
+    var total = drawer.querySelector("[data-cart-total]");
+    var itemsHost = drawer.querySelector("[data-cart-items]");
+    var submit = drawer.querySelector("[data-cart-submit]");
+    var close = drawer.querySelector("[data-cart-close]");
+
+    title.textContent = t("cart_title");
+    lines.textContent = t("cart_lines", { count: formatNumber(summary.lineCount) });
+    total.textContent = t("cart_total", { count: formatNumber(summary.totalQuantity) });
+    submit.textContent = t("cart_send");
+    submit.disabled = summary.lineCount === 0;
+    close.setAttribute("aria-label", t("cart_close"));
+
+    if (!summary.lineCount) {
+      itemsHost.innerHTML = '<div class="empty-card">' + escapeHtml(t("cart_empty")) + "</div>";
+      return;
+    }
+
+    itemsHost.innerHTML = summary.items.map(function (item) {
+      return '' +
+        '<article class="cart-item">' +
+          '<img class="cart-item__image" src="' + resolveImage(item) + '" alt="' + escapeHtml(getPartName(item)) + '">' +
+          '<div class="cart-item__body">' +
+            '<div class="cart-item__name">' + escapeHtml(getPartName(item)) + '</div>' +
+            '<div class="cart-item__code">' + t("code_label") + ': ' + escapeHtml(item.code) + '</div>' +
+            '<div class="cart-item__controls">' +
+              '<button class="control-btn control-btn--plain" type="button" data-cart-action="minus10" data-code="' + escapeHtml(item.code) + '">-10</button>' +
+              '<div class="manual-box manual-box--cart" aria-live="polite">' +
+                '<span>' + t("qty_label") + '</span>' +
+                '<strong class="manual-box__value">' + formatNumber(item.quantity) + "</strong>" +
+              "</div>" +
+              '<button class="control-btn control-btn--plain" type="button" data-cart-action="plus10" data-code="' + escapeHtml(item.code) + '">+10</button>' +
+            "</div>" +
+          "</div>" +
+        "</article>";
+    }).join("");
   }
 
   function buildWhatsAppMessage(items, modelName) {
     var lines = items.map(function (item, index) {
-      return (index + 1) + ". " + getInquiryName(item) + " | " + item.code + " | Qty: " + item.quantity;
+      return (index + 1) + ". " + getPartMessageName(item) + " | " + item.code + " | Qty: " + item.quantity;
     });
 
     return [
@@ -201,437 +745,85 @@
   }
 
   function buildWhatsAppUrl(items, modelName) {
-    return "https://wa.me/" + WHATSAPP_PHONE + "?text=" + encodeURIComponent(buildWhatsAppMessage(items, modelName));
-  }
-
-  function saveSubmission(payload) {
-    writeStorage(LAST_SUBMISSION_KEY, payload);
-  }
-
-  function readSubmission() {
-    return readStorage(LAST_SUBMISSION_KEY, null);
+    return "https://wa.me/8613602489689?text=" + encodeURIComponent(buildWhatsAppMessage(items, modelName));
   }
 
   function submitCart() {
-    var catalog = getCatalog();
-    var modelName = catalog && catalog.model ? catalog.model.name : "SYMPHONY ST";
     var summary = getCartSummary();
 
     if (!summary.lineCount) {
-      showToast("Cart is empty.");
-      return false;
+      showToast(t("toast_empty"));
+      return;
     }
 
-    saveSubmission({
-      createdAt: new Date().toISOString(),
+    var modelName = state.catalog.model.name || "SYMPHONY ST";
+    writeStorage(SUBMISSION_KEY, {
       model: modelName,
       items: summary.items,
-      message: buildWhatsAppMessage(summary.items, modelName),
       url: buildWhatsAppUrl(summary.items, modelName),
+      createdAt: new Date().toISOString()
     });
 
     window.location.href = "./success.html";
-    return true;
   }
 
-  function createCartShell() {
-    var wrap = document.createElement("div");
-    wrap.innerHTML = '' +
-      '<button class="cart-fab" type="button" data-cart-toggle aria-label="Open cart">' +
-        '<span class="cart-fab__icon">Cart</span>' +
-        '<span class="cart-fab__count" data-cart-count>0</span>' +
-      "</button>" +
-      '<div class="cart-mask" data-cart-mask hidden></div>' +
-      '<aside class="cart-drawer" data-cart-drawer aria-hidden="true">' +
-        '<div class="cart-drawer__header">' +
-          "<div>" +
-            '<p class="section-kicker">Inquiry Cart</p>' +
-            "<h2>Selected Parts</h2>" +
-          "</div>" +
-          '<button class="cart-drawer__close" type="button" data-cart-close aria-label="Close cart">x</button>' +
-        "</div>" +
-        '<div class="cart-drawer__summary">' +
-          '<span data-cart-lines>0 items</span>' +
-          '<span data-cart-total>0 qty</span>' +
-        "</div>" +
-        '<div class="cart-drawer__body" data-cart-items></div>' +
-        '<div class="cart-drawer__footer">' +
-          '<button class="primary-button primary-button--full" type="button" data-cart-submit>Submit Inquiry</button>' +
-        "</div>" +
-      "</aside>";
-    document.body.appendChild(wrap);
-  }
-
-  function syncQuantityViews(root) {
-    var scope = root || document;
-
-    scope.querySelectorAll("[data-quantity-for]").forEach(function (node) {
-      node.textContent = String(getPartQuantity(node.getAttribute("data-quantity-for")));
-    });
-
-    scope.querySelectorAll("[data-decrease-for]").forEach(function (button) {
-      button.disabled = getPartQuantity(button.getAttribute("data-decrease-for")) <= 0;
-    });
-
-    scope.querySelectorAll("[data-in-cart-for]").forEach(function (node) {
-      var qty = getPartQuantity(node.getAttribute("data-in-cart-for"));
-      node.hidden = qty <= 0;
-      node.textContent = "In cart: " + qty;
-    });
-  }
-
-  function renderCartDrawer() {
-    var shell = document.querySelector("[data-cart-drawer]");
-    if (!shell) {
+  function renderSuccessPage() {
+    if (document.body.getAttribute("data-page") !== "success") {
       return;
     }
 
-    var summary = getCartSummary();
-    var itemsHost = shell.querySelector("[data-cart-items]");
-    shell.querySelector("[data-cart-lines]").textContent = summary.lineCount + " item" + (summary.lineCount === 1 ? "" : "s");
-    shell.querySelector("[data-cart-total]").textContent = summary.totalQuantity + " qty";
-
-    document.querySelectorAll("[data-cart-count]").forEach(function (node) {
-      node.textContent = String(summary.lineCount);
-      node.hidden = summary.lineCount === 0;
-    });
-
-    shell.querySelector("[data-cart-submit]").disabled = summary.lineCount === 0;
-
-    if (!summary.lineCount) {
-      itemsHost.innerHTML = '' +
-        '<div class="empty-card">' +
-          "<p>Cart is empty.</p>" +
-        "</div>";
-      return;
-    }
-
-    itemsHost.innerHTML = summary.items.map(function (item) {
-      return '' +
-        '<article class="cart-row">' +
-          '<img class="cart-row__image" src="' + resolveImage(item) + '" alt="' + escapeHtml(getInquiryName(item)) + '">' +
-          '<div class="cart-row__content">' +
-            '<h3>' + escapeHtml(getPartTitle(item)) + "</h3>" +
-            (getPartSubtitle(item) ? '<p class="cart-row__sub">' + escapeHtml(getPartSubtitle(item)) + "</p>" : "") +
-            '<p class="cart-row__code">' + escapeHtml(item.code) + "</p>" +
-          "</div>" +
-          '<div class="qty-control qty-control--compact">' +
-            '<button type="button" data-cart-action="decrease" data-code="' + escapeHtml(item.code) + '"' + (item.quantity <= 0 ? " disabled" : "") + '>-10</button>' +
-            '<strong>' + item.quantity + "</strong>" +
-            '<button type="button" data-cart-action="increase" data-code="' + escapeHtml(item.code) + '">+10</button>' +
-          "</div>" +
-        "</article>";
-    }).join("");
-  }
-
-  function initCartShell() {
-    if (!document.querySelector("[data-cart-toggle]")) {
-      createCartShell();
-    }
-
-    var toggle = document.querySelector("[data-cart-toggle]");
-    var mask = document.querySelector("[data-cart-mask]");
-    var drawer = document.querySelector("[data-cart-drawer]");
-    var closeButton = document.querySelector("[data-cart-close]");
-    var submitButton = document.querySelector("[data-cart-submit]");
-
-    function setOpen(open) {
-      drawer.classList.toggle("cart-drawer--open", open);
-      drawer.setAttribute("aria-hidden", String(!open));
-      mask.hidden = !open;
-      document.body.classList.toggle("is-cart-open", open);
-    }
-
-    toggle.addEventListener("click", function () {
-      setOpen(true);
-    });
-    closeButton.addEventListener("click", function () {
-      setOpen(false);
-    });
-    mask.addEventListener("click", function () {
-      setOpen(false);
-    });
-    submitButton.addEventListener("click", submitCart);
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    });
-
-    drawer.addEventListener("click", function (event) {
-      var button = event.target.closest("button[data-cart-action]");
-      var item;
-      if (!button) {
-        return;
-      }
-      item = loadCart()[button.getAttribute("data-code")];
-      if (!item) {
-        return;
-      }
-      changeCartQuantity(item, button.getAttribute("data-cart-action") === "increase" ? STEP : -STEP);
-    });
-
-    window.addEventListener(CART_UPDATED_EVENT, renderCartDrawer);
-    renderCartDrawer();
-  }
-
-  function updateHomeStats() {
-    var catalog = getCatalog();
-    if (!catalog) {
-      document.querySelectorAll("[data-home-parts]").forEach(function (node) {
-        node.textContent = "Data unavailable";
-      });
-      document.querySelectorAll("[data-home-photos]").forEach(function (node) {
-        node.textContent = "Images unavailable";
-      });
-      return;
-    }
-
-    document.querySelectorAll("[data-home-model]").forEach(function (node) {
-      node.textContent = catalog.model.name;
-    });
-    document.querySelectorAll("[data-home-parts]").forEach(function (node) {
-      node.textContent = formatNumber(catalog.stats.totalParts) + " parts";
-    });
-    document.querySelectorAll("[data-home-photos]").forEach(function (node) {
-      node.textContent = formatNumber(catalog.stats.partsWithImages) + " images";
-    });
-    document.querySelectorAll("[data-home-image]").forEach(function (node) {
-      node.src = "./" + catalog.model.motorPicture;
-      node.alt = catalog.model.name;
-    });
-  }
-
-  function buildPartRow(part) {
-    return '' +
-      '<article class="part-row" data-part-code="' + escapeHtml(part.code) + '">' +
-        '<div class="part-row__image-wrap">' +
-          '<img class="part-row__image" src="' + resolveImage(part) + '" alt="' + escapeHtml(getInquiryName(part)) + '" loading="lazy">' +
-        "</div>" +
-        '<div class="part-row__content">' +
-          '<div class="part-row__text">' +
-            '<h3>' + escapeHtml(getPartTitle(part)) + "</h3>" +
-            (getPartSubtitle(part) ? '<p class="part-row__sub">' + escapeHtml(getPartSubtitle(part)) + "</p>" : "") +
-            '<p class="part-row__code">Code: ' + escapeHtml(part.code) + "</p>" +
-            '<span class="part-row__badge" data-in-cart-for="' + escapeHtml(part.code) + '" hidden>In cart: 0</span>' +
-          "</div>" +
-          '<div class="qty-control">' +
-            '<button type="button" data-row-action="decrease" data-decrease-for="' + escapeHtml(part.code) + '">-10</button>' +
-            '<div class="qty-control__center">' +
-              '<span class="qty-control__label">Qty</span>' +
-              '<strong data-quantity-for="' + escapeHtml(part.code) + '">0</strong>' +
-            "</div>" +
-            '<button type="button" data-row-action="increase">+10</button>' +
-          "</div>" +
-        "</div>" +
-      "</article>";
-  }
-
-  function renderPartsInfo(filteredLength) {
-    var total = state.catalog.length;
-    var status = document.getElementById("parts-status");
-    var meta = document.getElementById("parts-meta");
-    var summary = getCartSummary();
-
-    if (status) {
-      status.textContent = formatNumber(filteredLength) + " parts";
-    }
-    if (meta) {
-      meta.textContent = summary.lineCount + " selected / " + summary.totalQuantity + " qty";
-    }
-
-    var progress = document.getElementById("parts-progress");
-    if (progress) {
-      progress.textContent = "Showing " + formatNumber(Math.min(state.rendered, filteredLength)) + " / " + formatNumber(filteredLength || total);
-    }
-  }
-
-  function renderNextChunk() {
-    var host = document.getElementById("parts-list");
-    var footer = document.getElementById("parts-loading");
-    var empty = document.getElementById("parts-empty");
-    var sentinel = document.getElementById("parts-sentinel");
-
-    if (!host || !footer || !sentinel || !empty) {
-      return;
-    }
-
-    if (!state.filtered.length) {
-      empty.hidden = false;
-      footer.hidden = true;
-      sentinel.hidden = true;
-      renderPartsInfo(0);
-      return;
-    }
-
-    empty.hidden = true;
-
-    if (state.rendered >= state.filtered.length) {
-      footer.textContent = "All parts loaded";
-      sentinel.hidden = true;
-      renderPartsInfo(state.filtered.length);
-      return;
-    }
-
-    var nextSlice = state.filtered.slice(state.rendered, state.rendered + CHUNK_SIZE);
-    host.insertAdjacentHTML("beforeend", nextSlice.map(buildPartRow).join(""));
-    state.rendered += nextSlice.length;
-    syncQuantityViews(host);
-    footer.hidden = false;
-    footer.textContent = state.rendered >= state.filtered.length ? "All parts loaded" : "Loading more parts...";
-    sentinel.hidden = state.rendered >= state.filtered.length;
-    renderPartsInfo(state.filtered.length);
-  }
-
-  function resetPartsList(parts) {
-    var host = document.getElementById("parts-list");
-    var footer = document.getElementById("parts-loading");
-    var sentinel = document.getElementById("parts-sentinel");
-
-    state.filtered = parts;
-    state.rendered = 0;
-
-    if (host) {
-      host.innerHTML = "";
-    }
-    if (footer) {
-      footer.hidden = false;
-      footer.textContent = "Loading parts...";
-    }
-    if (sentinel) {
-      sentinel.hidden = false;
-    }
-
-    renderNextChunk();
-  }
-
-  function initPartsPage() {
-    var catalog = getCatalog();
-    var list = document.getElementById("parts-list");
-    var search = document.getElementById("parts-search");
-    var submit = document.getElementById("page-submit");
-    var sentinel = document.getElementById("parts-sentinel");
-    var image = document.getElementById("parts-model-image");
-    var count = document.getElementById("parts-count-chip");
-    var photo = document.getElementById("parts-photo-chip");
-
-    if (!catalog) {
-      document.getElementById("parts-loading").textContent = "Unable to load parts data";
-      return;
-    }
-
-    image.src = "./" + catalog.model.motorPicture;
-    image.alt = catalog.model.name;
-    count.textContent = formatNumber(catalog.stats.totalParts) + " total parts";
-    photo.textContent = formatNumber(catalog.stats.partsWithImages) + " matched images";
-
-    state.catalog = catalog.parts.slice();
-    state.filtered = state.catalog.slice();
-    state.index = {};
-    state.catalog.forEach(function (part) {
-      state.index[part.code] = part;
-    });
-
-    submit.addEventListener("click", submitCart);
-    list.addEventListener("click", function (event) {
-      var button = event.target.closest("button[data-row-action]");
-      var row;
-      var part;
-
-      if (!button) {
-        return;
-      }
-
-      row = button.closest("[data-part-code]");
-      part = state.index[row.getAttribute("data-part-code")];
-      if (!part) {
-        return;
-      }
-
-      changeCartQuantity(part, button.getAttribute("data-row-action") === "increase" ? STEP : -STEP);
-      syncQuantityViews(list);
-      renderPartsInfo(state.filtered.length);
-    });
-
-    search.addEventListener("input", function () {
-      var term = search.value.trim().toLowerCase();
-      if (!term) {
-        resetPartsList(state.catalog.slice());
-        return;
-      }
-
-      resetPartsList(state.catalog.filter(function (part) {
-        return String(part.searchText || "").includes(term);
-      }));
-    });
-
-    window.addEventListener(CART_UPDATED_EVENT, function () {
-      syncQuantityViews(list);
-      renderCartDrawer();
-      renderPartsInfo(state.filtered.length);
-    });
-
-    if ("IntersectionObserver" in window && sentinel) {
-      state.observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            renderNextChunk();
-          }
-        });
-      }, { rootMargin: "220px 0px" });
-      state.observer.observe(sentinel);
-    }
-
-    resetPartsList(state.catalog.slice());
-    renderPartsInfo(state.filtered.length);
-  }
-
-  function initSuccessPage() {
-    var submission = readSubmission();
-    var button = document.getElementById("success-open");
-    var list = document.getElementById("success-items");
+    var submission = readStorage(SUBMISSION_KEY, null);
     var text = document.getElementById("success-text");
-    var status = document.getElementById("success-status");
+    var list = document.getElementById("success-items");
+    var openButton = document.getElementById("success-open");
+
+    if (!text || !list || !openButton) {
+      return;
+    }
 
     if (!submission || !submission.items || !submission.items.length) {
-      text.textContent = "No inquiry found.";
-      button.href = "./parts.html";
-      button.textContent = "Back to Parts";
-      status.textContent = "";
-      list.innerHTML = '<div class="empty-card"><p>No inquiry found.</p></div>';
+      text.textContent = t("success_missing");
+      openButton.href = "./parts.html";
+      openButton.textContent = t("back_parts");
+      list.innerHTML = '<div class="empty-card">' + escapeHtml(t("success_missing")) + "</div>";
       return;
     }
 
-    button.href = submission.url;
-    text.textContent = "Inquiry ready.";
+    text.textContent = t("success_ready");
+    openButton.href = submission.url;
     list.innerHTML = submission.items.map(function (item) {
       return '' +
-        '<article class="summary-row">' +
-          "<div>" +
-            '<h3>' + escapeHtml(getInquiryName(item)) + "</h3>" +
-            '<p>' + escapeHtml(item.code) + "</p>" +
+        '<article class="summary-item">' +
+          '<div class="summary-item__main">' +
+            '<div class="summary-item__name">' + escapeHtml(getPartName(item)) + '</div>' +
+            '<div class="summary-item__code">' + t("code_label") + ': ' + escapeHtml(item.code) + '</div>' +
           "</div>" +
-          "<strong>Qty: " + item.quantity + "</strong>" +
+          '<strong class="summary-item__qty">' + t("qty_label") + " " + formatNumber(item.quantity) + "</strong>" +
         "</article>";
     }).join("");
-
-    status.textContent = "Redirecting...";
-    window.setTimeout(function () {
-      window.location.href = submission.url;
-    }, 1200);
   }
 
-  function initPage() {
-    var page = document.body.getAttribute("data-page");
-    initCartShell();
-    updateHomeStats();
+  function showToast(message) {
+    var root = document.getElementById("toast-root");
 
-    if (page === "parts") {
-      initPartsPage();
-    } else if (page === "success") {
-      initSuccessPage();
+    if (!root) {
+      return;
     }
-  }
 
-  document.addEventListener("DOMContentLoaded", initPage);
+    var toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    root.appendChild(toast);
+
+    window.requestAnimationFrame(function () {
+      toast.classList.add("is-visible");
+    });
+
+    window.setTimeout(function () {
+      toast.classList.remove("is-visible");
+      toast.addEventListener("transitionend", function () {
+        toast.remove();
+      }, { once: true });
+    }, 2000);
+  }
 })();
