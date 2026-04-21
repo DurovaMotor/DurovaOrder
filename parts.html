@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SYMPHONY ST Parts</title>
+    <meta
+      name="description"
+      content="Browse all SYMPHONY ST trial parts, adjust quantities by 10, and submit the inquiry to WhatsApp."
+    >
+    <link rel="stylesheet" href="./assets/css/styles.css">
+  </head>
+  <body data-page="parts">
+    <main class="page-shell page-shell--parts">
+      <header class="mobile-hero">
+        <div class="mobile-hero__top">
+          <a class="back-link" href="./index.html">Back to Models</a>
+          <button class="primary-button primary-button--small" type="button" id="page-submit">Submit Inquiry</button>
+        </div>
+
+        <div class="mobile-hero__card">
+          <div class="mobile-hero__copy">
+            <p class="section-kicker">Catalog</p>
+            <h1>SYMPHONY ST</h1>
+            <div class="chip-row">
+              <span class="info-chip" id="parts-count-chip">Loading parts...</span>
+              <span class="info-chip" id="parts-photo-chip">Loading images...</span>
+            </div>
+          </div>
+          <img class="mobile-hero__image" id="parts-model-image" src="./Database/MotorPictures/SYMPHONY ST.png" alt="SYMPHONY ST">
+        </div>
+      </header>
+
+      <section class="panel panel--sticky">
+        <div class="search-block">
+          <label for="parts-search">Search by part name or code</label>
+          <input id="parts-search" type="search" placeholder="Example: muffler, 50350-ARA-PT">
+        </div>
+        <div class="chip-row chip-row--compact">
+          <span class="info-chip" id="parts-status">0 parts</span>
+          <span class="info-chip" id="parts-meta">0 selected / 0 qty</span>
+          <span class="subtle-note" id="parts-progress">Showing 0 / 0</span>
+        </div>
+      </section>
+
+      <section class="parts-list" id="parts-list" aria-live="polite"></section>
+      <section class="empty-state" id="parts-empty" hidden>
+        <h2>No matching parts</h2>
+      </section>
+      <div class="list-footer" id="parts-loading">Loading parts...</div>
+      <div id="parts-sentinel" class="list-sentinel" aria-hidden="true"></div>
+    </main>
+
+    <div id="toast-root"></div>
+    <script src="./data/parts-data.js"></script>
+    <script src="./assets/js/app.js"></script>
+  </body>
+</html>

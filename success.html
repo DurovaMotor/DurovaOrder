@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Open WhatsApp</title>
+    <meta
+      name="description"
+      content="Continue to WhatsApp with the prepared HIGHTAC inquiry message."
+    >
+    <link rel="stylesheet" href="./assets/css/styles.css">
+  </head>
+  <body data-page="success">
+    <main class="page-shell">
+      <section class="success-card">
+        <p class="section-kicker">Success</p>
+        <h1>Continue in WhatsApp</h1>
+        <p id="success-text">
+          Preparing...
+        </p>
+        <div class="hero-card__actions">
+          <a class="primary-button" id="success-open" href="https://wa.me/8613602489689">Open WhatsApp</a>
+          <a class="ghost-button" href="./parts.html">Back to Parts</a>
+        </div>
+        <p class="subtle-note" id="success-status"></p>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <div>
+            <p class="section-kicker">Inquiry</p>
+            <h2>Selected Parts</h2>
+          </div>
+        </div>
+        <div class="summary-list" id="success-items"></div>
+      </section>
+    </main>
+
+    <div id="toast-root"></div>
+    <script src="./data/parts-data.js"></script>
+    <script src="./assets/js/app.js"></script>
+  </body>
+</html>
