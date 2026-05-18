@@ -578,7 +578,7 @@ img {
 .cart-fab {
   position: fixed;
   right: 18px;
-  bottom: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   z-index: 40;
   display: inline-flex;
   align-items: center;
@@ -625,10 +625,16 @@ img {
   z-index: 50;
   width: min(440px, 100vw);
   height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100svh;
+  max-height: 100dvh;
   padding: 18px;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 14px;
+  overflow: hidden;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(8, 18, 36, 0.92), rgba(4, 10, 22, 0.96));
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.35);
@@ -663,10 +669,20 @@ img {
 }
 
 .cart-drawer__body {
+  min-height: 0;
   overflow-y: auto;
   display: grid;
   gap: 12px;
   padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+.cart-drawer__footer {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: linear-gradient(180deg, rgba(8, 18, 36, 0), rgba(4, 10, 22, 0.96) 22%);
+  z-index: 1;
 }
 
 .cart-drawer__send,
@@ -899,6 +915,7 @@ body.is-rtl .bottom-actions {
 
   .cart-drawer {
     width: 100vw;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   }
 
   .bottom-actions {
