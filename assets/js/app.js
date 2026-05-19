@@ -494,6 +494,25 @@
     return updateCartQuantity(part, getPartQuantity(part.code) + delta);
   }
 
+
+  function parseQuantityInput(value) {
+    var next = Math.floor(Number(value));
+    return Number.isFinite(next) && next > 0 ? next : 0;
+  }
+
+  function commitQuantityInput(input, part) {
+    var next;
+    var updated;
+
+    if (!input || !part) {
+      return;
+    }
+
+    next = parseQuantityInput(input.value);
+    updated = updateCartQuantity(part, next);
+    input.value = String(updated);
+  }
+
   function initPage() {
     var page = document.body.getAttribute("data-page");
 
@@ -623,9 +642,9 @@
           '<div class="part-row__code">' + t("code_label") + ': ' + escapeHtml(part.code) + '</div>' +
           '<div class="part-row__controls">' +
             '<button class="control-btn control-btn--plain" type="button" data-action="minus10">-10</button>' +
-            '<div class="manual-box" aria-live="polite">' +
+            '<div class="manual-box">' +
               '<span>' + t("qty_label") + '</span>' +
-              '<strong class="manual-box__value" data-qty-display>' + formatNumber(quantity) + '</strong>' +
+              '<input class="manual-box__input" type="number" inputmode="numeric" min="0" step="1" value="' + escapeHtml(String(quantity)) + '" data-qty-input aria-label="' + escapeHtml(t("qty_label")) + '">' +
             '</div>' +
             '<button class="control-btn control-btn--plain" type="button" data-action="plus10">+10</button>' +
           '</div>' +
@@ -665,16 +684,43 @@
           changeCartQuantity(part, 10);
         }
       });
+
+
+      row.addEventListener("change", function (event) {
+        var input = event.target.closest("[data-qty-input]");
+        var code;
+        var part;
+
+        if (!input) {
+          return;
+        }
+
+        code = row.getAttribute("data-part-code");
+        part = findCatalogPart(code);
+        commitQuantityInput(input, part);
+      });
+
+      row.addEventListener("keydown", function (event) {
+        var input = event.target.closest("[data-qty-input]");
+
+        if (!input || event.key !== "Enter") {
+          return;
+        }
+
+        event.preventDefault();
+        input.blur();
+      });
     });
   }
 
   function syncPartInputs() {
     document.querySelectorAll("[data-part-code]").forEach(function (row) {
       var code = row.getAttribute("data-part-code");
-      var value = row.querySelector("[data-qty-display]");
+      var input = row.querySelector("[data-qty-input]");
+      var quantity = getPartQuantity(code);
 
-      if (value) {
-        value.textContent = formatNumber(getPartQuantity(code));
+      if (input && document.activeElement !== input) {
+        input.value = String(quantity);
       }
     });
   }
@@ -750,6 +796,35 @@
       }
     });
 
+
+
+    drawer.addEventListener("change", function (event) {
+      var input = event.target.closest("[data-cart-qty-input]");
+      var code;
+      var item;
+      var part;
+
+      if (!input) {
+        return;
+      }
+
+      code = input.getAttribute("data-code");
+      item = loadCart()[code];
+      part = findCatalogPart(code) || item;
+      commitQuantityInput(input, part);
+    });
+
+    drawer.addEventListener("keydown", function (event) {
+      var input = event.target.closest("[data-cart-qty-input]");
+
+      if (!input || event.key !== "Enter") {
+        return;
+      }
+
+      event.preventDefault();
+      input.blur();
+    });
+
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
         setCartOpen(false);
@@ -822,9 +897,9 @@
             '<div class="cart-item__code">' + t("code_label") + ': ' + escapeHtml(item.code) + '</div>' +
             '<div class="cart-item__controls">' +
               '<button class="control-btn control-btn--plain" type="button" data-cart-action="minus10" data-code="' + escapeHtml(item.code) + '">-10</button>' +
-              '<div class="manual-box manual-box--cart" aria-live="polite">' +
+              '<div class="manual-box manual-box--cart">' +
                 '<span>' + t("qty_label") + '</span>' +
-                '<strong class="manual-box__value">' + formatNumber(item.quantity) + "</strong>" +
+                '<input class="manual-box__input" type="number" inputmode="numeric" min="0" step="1" value="' + escapeHtml(String(item.quantity)) + '" data-cart-qty-input data-code="' + escapeHtml(item.code) + '" aria-label="' + escapeHtml(t("qty_label")) + '">' +
               "</div>" +
               '<button class="control-btn control-btn--plain" type="button" data-cart-action="plus10" data-code="' + escapeHtml(item.code) + '">+10</button>' +
             "</div>" +
