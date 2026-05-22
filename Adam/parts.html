@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Adam test access</title>
+  </head>
+  <body>
+    <script>
+      try {
+        window.sessionStorage.setItem("hightacAdamBypass", "1");
+      } catch (error) {
+        // Continue even when storage is unavailable.
+      }
+      window.location.replace("../parts.html");
+    </script>
+    <p>Opening test page...</p>
+  </body>
+</html>

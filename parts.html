@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="utf-8">
@@ -6,6 +6,7 @@
     <title>Pièces SYMPHONY ST</title>
     <meta name="description" content="Toutes les pièces SYMPHONY ST.">
     <link rel="stylesheet" href="./assets/css/styles.css?v=20260519-mobileqty">
+    <script src="./assets/js/access-guard.js?v=20260522-ipgate"></script>
   </head>
   <body data-page="parts">
     <div class="site-backdrop" aria-hidden="true">
@@ -56,7 +57,33 @@
     </main>
 
     <div id="toast-root"></div>
-    <script src="./data/parts-data.js?v=20260519-mobileqty"></script>
-    <script src="./assets/js/app.js?v=20260519-mobileqty"></script>
+    <script>
+      (function () {
+        var sources = [
+          "./data/parts-data.js?v=20260519-mobileqty",
+          "./assets/js/app.js?v=20260519-mobileqty"
+        ];
+
+        function loadScript(src) {
+          return new Promise(function (resolve, reject) {
+            var script = document.createElement("script");
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+          });
+        }
+
+        if (window.HIGHTAC_ACCESS_GUARD && window.HIGHTAC_ACCESS_GUARD.loadScripts) {
+          window.HIGHTAC_ACCESS_GUARD.loadScripts(sources);
+        } else {
+          sources.reduce(function (promise, src) {
+            return promise.then(function () {
+              return loadScript(src);
+            });
+          }, Promise.resolve());
+        }
+      })();
+    </script>
   </body>
 </html>
