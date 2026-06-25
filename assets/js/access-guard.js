@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var VERSION = "20260522-ipgate";
+  var VERSION = "20260625-language-guard";
   var CACHE_KEY = "hightacAccessGate." + VERSION;
   var BYPASS_KEY = "hightacAdamBypass";
   var CACHE_MS = 6 * 60 * 60 * 1000;
@@ -133,7 +133,11 @@
       return true;
     }
 
-    return signals.chinaTimeZone && signals.chineseLanguage;
+    if (signals.chineseLanguage) {
+      return true;
+    }
+
+    return false;
   }
 
   function showPage() {
